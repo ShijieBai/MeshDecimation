@@ -1,0 +1,40 @@
+cmake_minimum_required(VERSION 3.16)
+
+set(proj_name "MeshDecimation")
+project(${proj_name}
+        LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+
+if(MSVC)
+    add_definitions(/D_USE_MATH_DEFINES)  # for Pi
+endif ()
+
+set(Eigen3_DIR D:/soft/eigen-prefix/share/eigen3/cmake)
+set(CGAL_DIR D:/soft/cgal-6.1.1/lib/cmake/CGAL)
+set(Boost_DIR D:/soft/boost-1.90/lib/cmake/Boost-1.90.0)
+
+
+add_library(Third_library_interface INTERFACE)
+# Use Eigen
+find_package(Eigen3 REQUIRED NO_MODULE)
+target_link_libraries(Third_library_interface INTERFACE Eigen3::Eigen)
+
+# Use Boost as CGAL dependencies
+find_package(Boost REQUIRED CONFIG)
+target_link_libraries(Third_library_interface INTERFACE Boost::boost)
+
+# Use CGAL
+find_package(CGAL REQUIRED NO_MODULE)
+target_link_libraries(Third_library_interface INTERFACE CGAL)
+
+add_subdirectory(src/CGAL)
+target_link_libraries(CGAL_test PUBLIC Third_library_interface)
+
+add_executable(MeshDecimation main.cpp)
+target_link_libraries(MeshDecimation PUBLIC CGAL_test)
