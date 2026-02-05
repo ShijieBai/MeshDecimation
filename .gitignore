@@ -3,6 +3,8 @@
 
 build/*
 tmp/*
+input/*
+output/*
 
 # Compiled Object files
 *.slo
