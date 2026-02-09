@@ -20,7 +20,7 @@ set(CGAL_DIR D:/soft/cgal-6.1.1/lib/cmake/CGAL)
 #set(Boost_DIR D:/soft/boost-1.90/lib/cmake/Boost-1.90.0)
 set(BOOST_ROOT D:/soft/boost-1.90)
 set(OpenMesh_DIR D:/soft/OpenMesh/share/OpenMesh/cmake)
-
+set(pmp_DIR D:/soft/pmp/lib/cmake/pmp)
 
 add_library(Third_library_interface INTERFACE)
 # Use Eigen
@@ -44,6 +44,16 @@ target_link_libraries(Third_library_interface INTERFACE OpenMeshCore OpenMeshToo
 
 add_subdirectory(src/OpenMesh)
 target_link_libraries(OpenMesh_test PUBLIC Third_library_interface)
+
+# Use OpenMP as pmp dependencies
+find_package(OpenMP REQUIRED)
+
+# Use pmp
+find_package(pmp REQUIRED NO_MODULE)
+target_link_libraries(Third_library_interface INTERFACE pmp)
+
+add_subdirectory(src/pmp)
+target_link_libraries(pmp_test PUBLIC Third_library_interface)
 
 add_executable(MeshDecimation main.cpp)
 target_link_libraries(MeshDecimation PUBLIC CGAL_test OpenMesh_test)
