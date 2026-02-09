@@ -40,10 +40,10 @@ target_link_libraries(CGAL_test PUBLIC Third_library_interface)
 
 # Use OpenMesh
 find_package(OpenMesh REQUIRED NO_MODULE)
-target_link_libraries(Third_library_interface INTERFACE ${OPENMESH_LIBRARIES} )
+target_link_libraries(Third_library_interface INTERFACE OpenMeshCore OpenMeshTools )
 
 add_subdirectory(src/OpenMesh)
 target_link_libraries(OpenMesh_test PUBLIC Third_library_interface)
 
 add_executable(MeshDecimation main.cpp)
-target_link_libraries(MeshDecimation PUBLIC CGAL_test)
+target_link_libraries(MeshDecimation PUBLIC CGAL_test OpenMesh_test)
