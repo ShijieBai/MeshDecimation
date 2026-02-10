@@ -54,7 +54,7 @@ find_package(pmp REQUIRED NO_MODULE)
 target_link_libraries(pmp_Dependencies INTERFACE pmp Eigen3::Eigen)
 
 add_subdirectory(src/pmp)
-target_link_libraries(pmp_test PUBLIC pmp_Dependencies)
+target_link_libraries(pmp_test PRIVATE pmp_Dependencies)
 
 add_executable(MeshDecimation main.cpp)
 target_link_libraries(MeshDecimation PRIVATE CGAL_test OpenMesh_test pmp_test)

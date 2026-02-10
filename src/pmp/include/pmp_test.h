@@ -1,7 +1,5 @@
 #pragma once
-#include <pmp/io/io_flags.h>
-#include <pmp/io/io.h>
-#include <pmp/algorithms/decimation.h>
+#include <string>
 
 namespace pmp_test {
 

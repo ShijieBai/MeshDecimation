@@ -1,4 +1,7 @@
 #include "pmp_test.h"
+#include <pmp/io/io_flags.h>
+#include <pmp/io/io.h>
+#include <pmp/algorithms/decimation.h>
 
 void pmp_test::pmp_test(const std::string &input_file, const std::string &out_file, const double &angle) {
     auto time0 = std::chrono::steady_clock::now();
