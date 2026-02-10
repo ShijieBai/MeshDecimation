@@ -22,38 +22,39 @@ set(BOOST_ROOT D:/soft/boost-1.90)
 set(OpenMesh_DIR D:/soft/OpenMesh/share/OpenMesh/cmake)
 set(pmp_DIR D:/soft/pmp/lib/cmake/pmp)
 
-add_library(Third_library_interface INTERFACE)
 # Use Eigen
 find_package(Eigen3 REQUIRED NO_MODULE)
-target_link_libraries(Third_library_interface INTERFACE Eigen3::Eigen)
 
 # Use Boost as CGAL dependencies
 # find_package(Boost REQUIRED)
 # target_link_libraries(Third_library_interface INTERFACE Boost::boost)
 
 # Use CGAL, internal it find_package(Boost) 
+add_library(CGAL_Dependencies INTERFACE)
 find_package(CGAL REQUIRED NO_MODULE)
-target_link_libraries(Third_library_interface INTERFACE CGAL::CGAL)
+target_link_libraries(CGAL_Dependencies INTERFACE CGAL::CGAL)
 
 add_subdirectory(src/CGAL)
-target_link_libraries(CGAL_test PUBLIC Third_library_interface)
+target_link_libraries(CGAL_test PUBLIC CGAL_Dependencies)
 
 # Use OpenMesh
+add_library(OpenMesh_Dependencies INTERFACE)
 find_package(OpenMesh REQUIRED NO_MODULE)
-target_link_libraries(Third_library_interface INTERFACE OpenMeshCore OpenMeshTools )
+target_link_libraries(OpenMesh_Dependencies INTERFACE OpenMeshCore OpenMeshTools )
 
 add_subdirectory(src/OpenMesh)
-target_link_libraries(OpenMesh_test PUBLIC Third_library_interface)
+target_link_libraries(OpenMesh_test PUBLIC OpenMesh_Dependencies)
 
 # Use OpenMP as pmp dependencies
 find_package(OpenMP REQUIRED)
 
 # Use pmp
+add_library(pmp_Dependencies INTERFACE)
 find_package(pmp REQUIRED NO_MODULE)
-target_link_libraries(Third_library_interface INTERFACE pmp)
+target_link_libraries(pmp_Dependencies INTERFACE pmp Eigen3::Eigen)
 
 add_subdirectory(src/pmp)
-target_link_libraries(pmp_test PUBLIC Third_library_interface)
+target_link_libraries(pmp_test PUBLIC pmp_Dependencies)
 
 add_executable(MeshDecimation main.cpp)
-target_link_libraries(MeshDecimation PUBLIC CGAL_test OpenMesh_test)
+target_link_libraries(MeshDecimation PRIVATE CGAL_test OpenMesh_test pmp_test)
