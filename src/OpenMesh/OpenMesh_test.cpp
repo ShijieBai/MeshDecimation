@@ -1,12 +1,17 @@
 #include "OpenMesh_test.h"
 
-void OpenMesh::OpenMesh_test(const std::string& input_file, const std::string& out_file, const double& angle) {
+void OpenMesh::OpenMesh_test(const std::string &input_file,
+                             const std::string &out_file,
+                             const double &percent) {
     auto time0 = std::chrono::steady_clock::now();
     Mesh mesh;
 
     mesh.request_vertex_status();
     mesh.request_edge_status();
     mesh.request_face_status();
+    mesh.request_face_normals();
+    mesh.request_vertex_normals();
+    mesh.update_face_normals();
 
     if (!OpenMesh::IO::read_mesh(mesh, input_file)) {
         std::cerr << "OpenMesh failed to read STL\n";
@@ -25,7 +30,7 @@ void OpenMesh::OpenMesh_test(const std::string& input_file, const std::string& o
     //        mesh.status(e).set_locked(true);
     //}
 
-    double sharp_cos = std::cos(angle);
+   /* double sharp_cos = std::cos(angle);
 
     mesh.request_face_normals();
     mesh.update_face_normals();
@@ -50,23 +55,49 @@ void OpenMesh::OpenMesh_test(const std::string& input_file, const std::string& o
 
         if (cos_angle < sharp_cos)
             mesh.status(e).set_locked(true);
-    }
+    }*/
 
     using Decimater = OpenMesh::Decimater::DecimaterT<Mesh>;
     using HModQuadric = OpenMesh::Decimater::ModQuadricT<Mesh>;
     using HModQuadricHandle = OpenMesh::Decimater::ModHandleT<HModQuadric>;
 
+    using HNormal =  OpenMesh::Decimater::ModNormalFlippingT<Mesh>::Handle;
+    using HAspect =  OpenMesh::Decimater::ModAspectRatioT<Mesh>::Handle;
+    using HHausdorff =  OpenMesh::Decimater::ModHausdorffT<Mesh>::Handle;
+
     Decimater decimater(mesh);
     HModQuadricHandle hModQuadric;
+    HNormal hnormal;
+    HAspect haspect;
+    HHausdorff hausdorff;
     decimater.add(hModQuadric);
+    decimater.add(hnormal);
+    decimater.add(haspect);
+    decimater.add(hausdorff);
 
+    decimater.module(hModQuadric).unset_max_err();
+    decimater.module(hModQuadric).set_binary(false);
 
-    decimater.initialize();
+    decimater.module(hnormal).set_max_normal_deviation(20);
 
-    // Target: keep 30% of vertices
-    decimater.decimate_to(mesh.n_vertices() * 0.3);
+    decimater.module(haspect).set_binary(true);
+    decimater.module(haspect).set_aspect_ratio(4);
 
-    mesh.garbage_collection();
+    decimater.module(hausdorff).set_binary(true);
+    //decimater.module(hausdorff).set_tolerance();    // 1e-4 * bdx_diag
+
+    size_t num_v = mesh.n_vertices();
+    size_t iter_count = 5;
+    double r = std::pow(percent, 1.0 / iter_count);
+
+    size_t current = num_v;
+    for (int i = 0; i < iter_count; i++) {
+        current = static_cast<size_t>(num_v * std::pow(r, i + 1));
+        decimater.initialize();
+        decimater.decimate_to(current);
+        mesh.garbage_collection();
+        mesh.update_normals();
+    }
 
     std::cout << "decimated V: " << mesh.n_vertices() << " F: " << mesh.n_faces() << std::endl;
 
